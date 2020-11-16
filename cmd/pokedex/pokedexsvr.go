@@ -6,13 +6,27 @@ import (
 	"os"
 
 	"github.com/Pokedex/internal/config"
+	"github.com/Pokedex/internal/database"
 	"github.com/Pokedex/internal/service/pokedex"
+	"github.com/jmoiron/sqlx"
 )
 
 func main() {
 	cfg := readConfig()
 	// uso m de pokeMon, p esta reservada para Pokedex
-	service, _ := pokedex.New(cfg) // inyecto a mi servicio una config
+
+	db, err := database.NewDatabase(cfg) // instanciado de la database
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
+	if err := createSchema(db); err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
+	service, _ := pokedex.New(db, cfg) // inyecto a mi servicio una config y 1 db
 	for _, m := range service.FindAll() {
 		fmt.Println(m)
 	}
@@ -29,4 +43,20 @@ func readConfig() *config.Config {
 		os.Exit(1)
 	}
 	return cfg
+}
+
+func createSchema(db *sqlx.DB) error {
+	schema := `CREATE TABLE IF NOT EXISTS pokedex (
+		id integer primary key,
+		name varchar);`
+
+	_, err := db.Exec(schema)
+	if err != nil {
+		return err
+	}
+
+	insertPokemon := `INSERT INTO pokedex (name) VALUES (?)`
+	s := fmt.Sprintf("ivysaur")
+	db.MustExec(insertPokemon, s)
+	return nil
 }

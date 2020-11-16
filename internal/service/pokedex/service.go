@@ -1,6 +1,9 @@
 package pokedex
 
-import "github.com/Pokedex/internal/config"
+import (
+	"github.com/Pokedex/internal/config"
+	"github.com/jmoiron/sqlx"
+)
 
 // Pokemon ... como se define cada pokemon en la pokedex
 type Pokemon struct {
@@ -16,12 +19,13 @@ type PokedexService interface {
 }
 
 type service struct {
+	db   *sqlx.DB
 	conf *config.Config
 }
 
 // New ...
-func New(c *config.Config) (PokedexService, error) {
-	return service{c}, nil
+func New(db *sqlx.DB, c *config.Config) (PokedexService, error) {
+	return service{db, c}, nil
 }
 
 func (s service) AddPokemon(m Pokemon) error {
@@ -34,6 +38,8 @@ func (s service) FindByID(ID int) *Pokemon {
 
 func (s service) FindAll() []*Pokemon {
 	var list []*Pokemon
-	list = append(list, &Pokemon{1, "Bulbasaur"})
+	if err := s.db.Select(&list, "SELECT * FROM pokedex"); err != nil {
+		panic(err)
+	}
 	return list
 }
