@@ -11,8 +11,8 @@ type Pokemon struct {
 	Name string
 }
 
-// PokedexService ...
-type PokedexService interface {
+// Service ...
+type Service interface {
 	AddPokemon(Pokemon) error
 	FindByID(int) *Pokemon
 	FindAll() []*Pokemon
@@ -24,7 +24,7 @@ type service struct {
 }
 
 // New ...
-func New(db *sqlx.DB, c *config.Config) (PokedexService, error) {
+func New(db *sqlx.DB, c *config.Config) (Service, error) {
 	return service{db, c}, nil
 }
 
@@ -33,7 +33,12 @@ func (s service) AddPokemon(m Pokemon) error {
 }
 
 func (s service) FindByID(ID int) *Pokemon {
-	return nil
+	// mia
+	var pokemon *Pokemon
+	if err := s.db.Select(&pokemon, "SELECT * FROM pokedex WHERE ID=$ID"); err != nil {
+		panic(err)
+	}
+	return pokemon
 }
 
 func (s service) FindAll() []*Pokemon {

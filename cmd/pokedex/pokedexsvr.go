@@ -8,6 +8,7 @@ import (
 	"github.com/Pokedex/internal/config"
 	"github.com/Pokedex/internal/database"
 	"github.com/Pokedex/internal/service/pokedex"
+	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -16,6 +17,7 @@ func main() {
 	// uso m de pokeMon, p esta reservada para Pokedex
 
 	db, err := database.NewDatabase(cfg) // instanciado de la database
+	defer db.Close()
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
@@ -26,10 +28,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	service, _ := pokedex.New(db, cfg) // inyecto a mi servicio una config y 1 db
-	for _, m := range service.FindAll() {
-		fmt.Println(m)
-	}
+	service, _ := pokedex.New(db, cfg)               // inyecto a mi servicio una config y 1 db
+	httpService := pokedex.NewHTTPTransport(service) // servicio http que usa mi servicio
+	r := gin.Default()
+	httpService.Register(r)
+	r.Run()
 
 }
 
@@ -55,8 +58,9 @@ func createSchema(db *sqlx.DB) error {
 		return err
 	}
 
-	insertPokemon := `INSERT INTO pokedex (name) VALUES (?)`
-	s := fmt.Sprintf("ivysaur")
-	db.MustExec(insertPokemon, s)
+	// insertPokemon := `INSERT INTO pokedex (name) VALUES (?)`
+	// s := fmt.Sprintf("ivysaur")
+	// db.MustExec(insertPokemon, s)
+	// esto lo uso para insertar valores
 	return nil
 }
