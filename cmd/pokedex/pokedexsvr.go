@@ -58,9 +58,5 @@ func createSchema(db *sqlx.DB) error {
 		return err
 	}
 
-	// insertPokemon := `INSERT INTO pokedex (name) VALUES (?)`
-	// s := fmt.Sprintf("ivysaur")
-	// db.MustExec(insertPokemon, s)
-	// esto lo uso para insertar valores
 	return nil
 }
