@@ -76,7 +76,7 @@ func getAll(s Service) gin.HandlerFunc {
 
 func getOne(s Service) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.ParseInt(c.Param("ID"), 6, 12) // hago esto porque lo trae como string
+		id, err := strconv.ParseInt(c.Param("ID"), 0, 64) // hago esto porque lo trae como string
 		if err == nil {
 			p := s.FindByID(id)
 			c.JSON(http.StatusOK, gin.H{
@@ -89,7 +89,7 @@ func getOne(s Service) gin.HandlerFunc {
 
 func deleteOne(s Service) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id, err := strconv.ParseInt(c.Param("ID"), 6, 12) // hago esto porque lo trae como string
+		id, err := strconv.ParseInt(c.Param("ID"), 0, 64) // hago esto porque lo trae como string
 		if err == nil {
 			s.DeleteByID(id)
 			c.JSON(http.StatusOK, gin.H{})
@@ -110,7 +110,7 @@ func postOne(s Service) gin.HandlerFunc {
 func changeOne(s Service) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		name := c.Param("name")
-		id, err := strconv.ParseInt(c.Param("ID"), 6, 12)
+		id, err := strconv.ParseInt(c.Param("ID"), 0, 64)
 		if err == nil {
 			s.ChangePokemon(id, name)
 			c.JSON(http.StatusOK, gin.H{})
