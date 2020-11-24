@@ -2,7 +2,7 @@ package pokedex
 
 import (
 	"database/sql"
-	"log"
+	"errors"
 
 	"github.com/Pokedex/internal/config"
 	"github.com/jmoiron/sqlx"
@@ -34,38 +34,29 @@ func New(db *sqlx.DB, c *config.Config) (Service, error) {
 }
 
 func (s service) AddPokemon(m string) error {
-	err := s.db.QueryRow("INSERT INTO pokedex (name) VALUES (?)", m).Scan(&m)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			// no se encontro nada
-		} else {
-			log.Fatal(err)
-		}
+	err := s.db.QueryRow("INSERT INTO pokedex (name) VALUES (?)", m).Scan()
+	if err != nil && err != sql.ErrNoRows {
+		return errors.New("hubo un error en la insercion")
 	}
+
 	return nil
 }
 
 func (s service) ChangePokemon(ID int64, m string) error {
-	err := s.db.QueryRow("UPDATE pokedex SET Name=? WHERE ID=?", m, ID).Scan(&ID, &m)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			// no se encontro nada
-		} else {
-			log.Fatal(err)
-		}
+	err := s.db.QueryRow("UPDATE pokedex SET Name=? WHERE ID=?", m, ID).Scan()
+	if err != nil && err != sql.ErrNoRows {
+		return errors.New("hubo un error en la modificacion")
 	}
+
 	return nil
 }
 
 func (s service) DeleteByID(ID int64) error {
-	err := s.db.QueryRow("DELETE FROM pokedex WHERE ID = ?", ID).Scan(&ID)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			// no se encontro nada
-		} else {
-			log.Fatal(err)
-		}
+	err := s.db.QueryRow("DELETE FROM pokedex WHERE ID = ?", ID).Scan()
+	if err != nil && err != sql.ErrNoRows {
+		return errors.New("hubo un error en la eliminacion")
 	}
+
 	return nil
 }
 
