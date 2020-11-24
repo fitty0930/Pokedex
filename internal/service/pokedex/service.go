@@ -16,6 +16,8 @@ type Service interface {
 	AddPokemon(string) error
 	FindByID(int64) *Pokemon
 	FindAll() []*Pokemon
+	DeleteByID(int64) error
+	ChangePokemon(ID int64, m string) error
 }
 
 type service struct {
@@ -33,10 +35,23 @@ func (s service) AddPokemon(m string) error {
 	return nil
 }
 
+func (s service) ChangePokemon(ID int64, m string) error {
+	s.db.MustExec("UPDATE pokedex SET Name=? WHERE ID=?", m, ID)
+	return nil
+}
+
+func (s service) DeleteByID(ID int64) error {
+	err := s.db.MustExec("DELETE FROM pokedex WHERE ID = ?", ID)
+	if err != nil {
+		return nil
+	}
+	return nil
+}
+
 func (s service) FindByID(ID int64) *Pokemon {
 	// mia
 	var pokemon Pokemon
-	err := s.db.QueryRow("SELECT * FROM pokedex WHERE ID = $1", ID).Scan(&pokemon.ID, &pokemon.Name)
+	err := s.db.QueryRow("SELECT * FROM pokedex WHERE ID = ?", ID).Scan(&pokemon.ID, &pokemon.Name)
 	if err != nil {
 		return nil
 	}
